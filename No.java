@@ -1,5 +1,6 @@
 public class No {
     char valor;
+    int fatordebalanceamento;
     No esquerdo, direito;
 
     public No(char valor) {
