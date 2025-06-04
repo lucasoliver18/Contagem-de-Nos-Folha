@@ -6,12 +6,12 @@ public class ArvoreBinariaSR {
     public No raiz;
 
     public ArvoreBinariaSR() {
-        raiz = new No('A');
-        raiz.esquerdo = new No('B');
-        raiz.direito = new No('C');
-        raiz.esquerdo.esquerdo = new No('D');
-        raiz.esquerdo.direito = new No('E');
-        raiz.direito.direito = new No('F');
+        raiz = new No("A");
+        raiz.esquerdo = new No("B");
+        raiz.direito = new No("C");
+        raiz.esquerdo.esquerdo = new No("D");
+        raiz.esquerdo.direito = new No("E");
+        raiz.direito.direito = new No("F");
     }
 
     public int contarNosFolha(No raiz) {
@@ -24,15 +24,12 @@ public class ArvoreBinariaSR {
         while (!fila.isEmpty()) {
             No atual = fila.poll();
 
-            // Se o nó atual é folha (sem filhos)
             if (atual.esquerdo == null && atual.direito == null) {
                 contador++;
             } else {
-                // Se tem filho esquerdo, adiciona na fila
                 if (atual.esquerdo != null) {
                     fila.add(atual.esquerdo);
                 }
-                // Se tem filho direito, adiciona na fila
                 if (atual.direito != null) {
                     fila.add(atual.direito);
                 }

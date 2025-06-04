@@ -1,55 +1,123 @@
 public class ArvoreAVL {
-
     public No raiz;
 
-    public void inserir(char valor) {
-        raiz = inserirAVL(raiz, valor);
+    public int altura(No no) {
+        return no == null ? 0 : no.altura;
     }
 
-    private No inserirAVL(No no, char valor) {
-        if (no == null) return new No(valor);
+    public int fatorBalanceamento(No no) {
+        return no == null ? 0 : altura(no.esquerdo) - altura(no.direito);
+    }
 
-        if (valor < no.valor) {
-            no.esquerdo = inserirAVL(no.esquerdo, valor);
-        } else if (valor > no.valor) {
-            no.direito = inserirAVL(no.direito, valor);
-        } else {
+    public No rotacaoDireita(No y) {
+        No x = y.esquerdo;
+        No T2 = x.direito;
+
+        x.direito = y;
+        y.esquerdo = T2;
+
+        y.altura = Math.max(altura(y.esquerdo), altura(y.direito)) + 1;
+        x.altura = Math.max(altura(x.esquerdo), altura(x.direito)) + 1;
+
+        return x;
+    }
+
+    public No rotacaoEsquerda(No x) {
+        No y = x.direito;
+        No T2 = y.esquerdo;
+
+        y.esquerdo = x;
+        x.direito = T2;
+
+        x.altura = Math.max(altura(x.esquerdo), altura(x.direito)) + 1;
+        y.altura = Math.max(altura(y.esquerdo), altura(y.direito)) + 1;
+
+        return y;
+    }
+
+    public No inserir(No no, String valor) {
+        if (no == null)
+            return new No(valor);
+
+        if (valor.compareTo(no.valor) < 0)
+            no.esquerdo = inserir(no.esquerdo, valor);
+        else if (valor.compareTo(no.valor) > 0)
+            no.direito = inserir(no.direito, valor);
+        else
             return no;
+
+        no.altura = 1 + Math.max(altura(no.esquerdo), altura(no.direito));
+        int balanceamento = fatorBalanceamento(no);
+
+        if (balanceamento > 1 && valor.compareTo(no.esquerdo.valor) < 0)
+            return rotacaoDireita(no);
+
+        if (balanceamento < -1 && valor.compareTo(no.direito.valor) > 0)
+            return rotacaoEsquerda(no);
+
+        if (balanceamento > 1 && valor.compareTo(no.esquerdo.valor) > 0) {
+            no.esquerdo = rotacaoEsquerda(no.esquerdo);
+            return rotacaoDireita(no);
         }
 
-        atualizarAltura(no);
-        return balancear(no);
-    }
-
-    public void remover(char valor) {
-        raiz = removerAVL(raiz, valor);
-    }
-
-    private No removerAVL(No no, char valor) {
-        if (no == null) return null;
-
-        if (valor < no.valor) {
-            no.esquerdo = removerAVL(no.esquerdo, valor);
-        } else if (valor > no.valor) {
-            no.direito = removerAVL(no.direito, valor);
-        } else {
-            if (no.esquerdo == null) return no.direito;
-            if (no.direito == null) return no.esquerdo;
-
-            No sucessor = encontrarMinimo(no.direito);
-            no.valor = sucessor.valor;
-            no.direito = removerAVL(no.direito, sucessor.valor);
+        if (balanceamento < -1 && valor.compareTo(no.direito.valor) < 0) {
+            no.direito = rotacaoDireita(no.direito);
+            return rotacaoEsquerda(no);
         }
 
-        atualizarAltura(no);
-        return balancear(no);
-    }
-
-    private No encontrarMinimo(No no) {
-        while (no.esquerdo != null) {
-            no = no.esquerdo;
-        }
         return no;
+    }
+
+    public void inserir(String valor) {
+        raiz = inserir(raiz, valor);
+    }
+
+    public No remover(No raiz, String valor) {
+        if (raiz == null)
+            return raiz;
+
+        if (valor.compareTo(raiz.valor) < 0)
+            raiz.esquerdo = remover(raiz.esquerdo, valor);
+        else if (valor.compareTo(raiz.valor) > 0)
+            raiz.direito = remover(raiz.direito, valor);
+        else {
+            if ((raiz.esquerdo == null) || (raiz.direito == null)) {
+                No temp = (raiz.esquerdo != null) ? raiz.esquerdo : raiz.direito;
+                raiz = (temp == null) ? null : temp;
+            } else {
+                No temp = menorValorNo(raiz.direito);
+                raiz.valor = temp.valor;
+                raiz.direito = remover(raiz.direito, temp.valor);
+            }
+        }
+
+        if (raiz == null)
+            return raiz;
+
+        raiz.altura = Math.max(altura(raiz.esquerdo), altura(raiz.direito)) + 1;
+        int balanceamento = fatorBalanceamento(raiz);
+
+        if (balanceamento > 1 && fatorBalanceamento(raiz.esquerdo) >= 0)
+            return rotacaoDireita(raiz);
+
+        if (balanceamento > 1 && fatorBalanceamento(raiz.esquerdo) < 0) {
+            raiz.esquerdo = rotacaoEsquerda(raiz.esquerdo);
+            return rotacaoDireita(raiz);
+        }
+
+        if (balanceamento < -1 && fatorBalanceamento(raiz.direito) <= 0)
+            return rotacaoEsquerda(raiz);
+
+        if (balanceamento < -1 && fatorBalanceamento(raiz.direito) > 0) {
+            raiz.direito = rotacaoDireita(raiz.direito);
+            return rotacaoEsquerda(raiz);
+        }
+
+        return raiz;
+    }
+
+    public void remover(String valor) {
+        raiz = remover(raiz, valor);
     }
 
     public void preOrdem() {
@@ -65,61 +133,10 @@ public class ArvoreAVL {
         }
     }
 
-    private int altura(No no) {
-        return no == null ? 0 : no.altura;
-    }
-
-    private void atualizarAltura(No no) {
-        no.altura = 1 + Math.max(altura(no.esquerdo), altura(no.direito));
-    }
-
-    private int fatorBalanceamento(No no) {
-        return no == null ? 0 : altura(no.esquerdo) - altura(no.direito);
-    }
-
-    private No balancear(No no) {
-        int fb = fatorBalanceamento(no);
-
-        if (fb > 1) {
-            if (fatorBalanceamento(no.esquerdo) < 0) {
-                no.esquerdo = rotacaoEsquerda(no.esquerdo);
-            }
-            return rotacaoDireita(no);
-        }
-
-        if (fb < -1) {
-            if (fatorBalanceamento(no.direito) > 0) {
-                no.direito = rotacaoDireita(no.direito);
-            }
-            return rotacaoEsquerda(no);
-        }
-
-        return no;
-    }
-
-    private No rotacaoDireita(No y) {
-        No x = y.esquerdo;
-        No T2 = x.direito;
-
-        x.direito = y;
-        y.esquerdo = T2;
-
-        atualizarAltura(y);
-        atualizarAltura(x);
-
-        return x;
-    }
-
-    private No rotacaoEsquerda(No x) {
-        No y = x.direito;
-        No T2 = y.esquerdo;
-
-        y.esquerdo = x;
-        x.direito = T2;
-
-        atualizarAltura(x);
-        atualizarAltura(y);
-
-        return y;
+    private No menorValorNo(No no) {
+        No atual = no;
+        while (atual.esquerdo != null)
+            atual = atual.esquerdo;
+        return atual;
     }
 }

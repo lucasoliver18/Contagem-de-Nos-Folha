@@ -1,12 +1,10 @@
 public class No {
-    char valor;
+    String valor;
     int altura;
     No esquerdo, direito;
 
-    public No(char valor) {
+    public No(String valor) {
         this.valor = valor;
         this.altura = 1;
-        this.esquerdo = null;
-        this.direito = null;
     }
 }
